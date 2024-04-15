@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Проверяем, что переданы обе директории
+if [ $# -ne 2 ]; then
+    echo "Использование: $0 <входная_директория> <выходная_директория>"
+    exit 1
+fi
+
+# Проверяем, что входная директория существует
+if [ ! -d "$1" ]; then
+    echo "Входная директория не существует"
+    exit 1
+fi
+
+# Создаем выходную директорию, если она не существует
+if [ ! -d "$2" ]; then
+    mkdir -p "$2"
+fi
+
+# Копируем все файлы из входной директории в выходную
+while IFS= read -r -d '' file; do
+    filename=$(basename -- "$file")
+    extension="${filename##*.}"
+    filename="${filename%.*}"
+    count=0
+    while [ -e "$2/$filename$count.$extension" ]; do
+        ((count++))
+    done
+    cp "$file" "$2/$filename$count.$extension"
+done < <(find "$1" -type f -print0)
+echo "Success"
